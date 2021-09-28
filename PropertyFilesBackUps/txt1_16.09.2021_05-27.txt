@@ -1,0 +1,7 @@
+amit=12
+adi=13
+#text
+#qw=1
+e=12
+#text
+r=199

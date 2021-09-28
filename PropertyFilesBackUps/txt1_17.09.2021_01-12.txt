@@ -1,0 +1,4 @@
+#<@>*FiledRange(1,19)
+#<@>*FieldType(int)
+#<@>*Caption(good!)
+wadsxvc = 12

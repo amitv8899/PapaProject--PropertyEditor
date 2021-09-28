@@ -1,0 +1,323 @@
+﻿using MaterialSkin.Controls;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace PapaProject
+{
+    public partial class PropertyFrom : Form
+    {
+        private List<Line> m_LineArray;
+        private ReadFromFile m_Newfile;
+        private Table m_PropertiesTable;
+        private bool m_ChangeHadBeenMade = false;
+        private bool m_NeedShowLabelRemark = false;
+        private int m_NumberLabel = 0;
+        private int m_NumberLabelRemark = 0;
+        private Line m_CurLineSelected = null;// if null no line is selected
+
+       // readonly MaterialSkin.MaterialSkinManager r_MaterialSkinManager;
+
+        public PropertyFrom()
+        {
+            InitializeComponent();
+            //r_MaterialSkinManager = MaterialSkin.MaterialSkinManager.Instance;
+            //r_MaterialSkinManager.EnforceBackcolorOnAllComponents = true;
+            //r_MaterialSkinManager.AddFormToManage(this);
+            //this.ControlBox = true;
+
+
+        }
+        private void Form_Load(object sender, EventArgs e)
+        {
+            // allocate 
+            m_Newfile = new ReadFromFile();
+            m_PropertiesTable = new Table();
+            // create table 
+            CreateTableFromFile();
+            //this
+            this.FormClosing += new FormClosingEventHandler(FormClosed_Clicked);
+            CreateLine();
+        }
+
+
+        private void CreateLine() 
+        {
+            if (InitializeAllLine() == 0)
+            {
+                this.ClientSize = new Size(m_LineArray.Last<Line>().Size.Width + 20, 200);
+                this.MinimumSize = new Size(m_LineArray.Last<Line>().Size.Width + 40, FlowAllLine.Height);
+                
+            }
+            else
+            {
+                if (m_PropertiesTable.IsTableEmpty())
+                {
+                    MessageBox.Show("No label or Remark Label");
+                    this.Close();
+                }
+            }
+           
+        }
+        public void CreateTableFromFile()
+        {
+            string LineFromFile;
+            bool FileNotOver = true;
+            m_Newfile.TakeNameFileFromUser();
+            m_Newfile.CoutNumberProperties(out int NumberOfLines);
+            m_PropertiesTable.IntinitializeNewTableFromFile(NumberOfLines);
+            int Ok = 0;
+            while (FileNotOver)
+            {
+                LineFromFile = m_Newfile.ReadNextLineFromFile();
+                if (LineFromFile == null)// end of file! if line == null 
+                {
+                    FileNotOver = false;
+                }
+                else
+                {
+                    Ok = m_PropertiesTable.InsertLineToTable(LineFromFile);
+                    if (Ok == 1) // 1 == not Ok!!
+                    {
+                        break;
+                    }
+                }
+            }
+            m_Newfile.CloseFile(); // close file , table is ready
+        }
+        public int InitializeAllLine() // initialize from to user 
+        {
+            m_LineArray = new List<Line>();
+            StringBuilder[] NewLine;
+            bool MoreLineInTable = true;
+            int IndexForLine = 1;
+            int ToReturn = 0;
+            m_NumberLabel = 0; // make zero again
+            m_NumberLabelRemark = 0;// make zero again0
+            //# check if table is empty!
+            while (MoreLineInTable)
+            {
+                NewLine = m_PropertiesTable.LineTable(IndexForLine);// if table is done or is empty so break
+
+                if (NewLine == null)
+                {
+                    MoreLineInTable = false;
+                    break;
+                }
+              
+                if ((NewLine[0].ToString() == eTypes.Label.ToString()))
+                {
+                   m_NumberLabel++;
+                }
+                else if((NewLine[0].ToString() == eTypes.LabelRemark.ToString()))
+                {
+                   
+                    m_NumberLabelRemark++;
+                }
+                if ((NewLine[0].ToString() == eTypes.Label.ToString()) || (m_NeedShowLabelRemark && (NewLine[0].ToString() == eTypes.LabelRemark.ToString())))
+                {
+                    m_LineArray.Add(new Line());
+                    m_LineArray.Last<Line>().InitializeNewLine(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine);
+                    m_LineArray.Last<Line>().TaxBoxValChangedInvoker += UpdateTable;
+                    m_LineArray.Last<Line>().CheckBoxRemarkChangeInvoker += UpdateRemarkLabel;
+                    m_LineArray.Last<Line>().LineSelectedInvoker += UpdateLineSelected;
+                    if (NewLine[0].ToString() == eTypes.LabelRemark.ToString())
+                    {
+                        m_LineArray.Last<Line>().MakeLineInaccessible();
+                    }
+                    /// here add as invker to check box!
+                    if (this.FlowAllLine.Controls.Count < 0)
+                    {
+                        this.FlowAllLine.Controls.Clear();
+                    }
+                    else
+                    this.FlowAllLine.Controls.Add(m_LineArray.Last<Line>());
+
+                }
+                IndexForLine++;
+            }
+            if (m_LineArray.Count == 0)
+            {
+
+                MessageBox.Show("No Label To Show!");
+                ToReturn = 1;
+            }
+            return ToReturn;
+        }
+        private void FormClosed_Clicked(object sender, FormClosingEventArgs e)
+        {
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            DialogResult result = DialogResult.Yes;
+            StringBuilder message = new StringBuilder();
+            message.AppendFormat("Change had been made{0} Are you sure you want to close Editor?", System.Environment.NewLine);
+
+            if (m_ChangeHadBeenMade == true) 
+            {
+                result = MessageBox.Show(message.ToString(), "PropertyForm", buttons);
+            }
+            if (result == DialogResult.Yes)
+            {
+                e.Cancel = false;
+                m_ChangeHadBeenMade = false;
+                m_NeedShowLabelRemark = false;
+            }
+            else 
+            {
+                e.Cancel=true;
+            }
+        }
+        private void ButtomUpdate_Clicked(object sender, EventArgs e)
+        {
+            // save to file
+            bool TableNotOver = true;
+            string LineToFile;
+            int Line = 1;
+            StringBuilder message = new StringBuilder("Are you sure yow want to update file?");
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            DialogResult result = DialogResult.Yes;
+            if (m_ChangeHadBeenMade == true)
+            {
+                result = MessageBox.Show(message.ToString(), "PropertyForm", buttons);
+            }
+
+            if (result == DialogResult.Yes)
+            {
+                m_ChangeHadBeenMade = false;
+                m_Newfile.DuplicateOriginalFile(); // create new back up file 
+                m_Newfile.CreateWriter();
+                while (TableNotOver)
+                {
+                    LineToFile = m_PropertiesTable.LineTableInOneStr(Line);
+                    if (LineToFile == null)
+                        break;
+                 
+                    m_Newfile.WriteLineToFile(LineToFile);
+                    Line++;
+                }
+
+                string Msg = "The Changes saved!";
+                MessageBox.Show(Msg);// here add the name of the file !
+                m_Newfile.CloseFileWriter();
+                //// delete all lines and create new one 
+                m_LineArray.Clear();
+                FlowAllLine.Controls.Clear();
+                CreateLine();
+                ///
+            }
+            else
+                MessageBox.Show("The Changes *didn't* save!");
+
+           
+        }
+        private void ButtomLabelRemark_Clicked(object sender, EventArgs e)
+        {
+           if (m_NeedShowLabelRemark == false)
+           {
+               if (m_NumberLabelRemark != 0)   // if there zero Remark label   
+               { 
+                  ButtomRemarkList.Text = "Hide Remarks";
+                  m_NeedShowLabelRemark = true;
+                  // show all lebel include those as remark
+                  // delete all line and create new ones with label remark
+                   m_LineArray.Clear();
+                   FlowAllLine.Controls.Clear();
+                   CreateLine();
+               }
+               else
+               {
+                    MessageBox.Show("No Remark Label To Show", "PropertyForm");
+               }    
+           }
+           else
+           {
+                if (m_NumberLabel != 0)// if there zero label and there is remark label 
+                {
+                    ButtomRemarkList.Text = "Show Remarks";
+                    m_NeedShowLabelRemark = false;
+                    // show all lebel witout those as remark
+                    // delete all line and create new ones without label remark
+                    m_LineArray.Clear();
+                    FlowAllLine.Controls.Clear();
+                    CreateLine();
+                }
+                else
+                {
+                    MessageBox.Show("No Label To Show", "PropertyForm");
+                }
+             
+           }
+        }
+
+        private void UpdateTable(int Line, string NewVal)
+        {
+            m_PropertiesTable.ChangeValueInTable(Line, NewVal);
+            m_ChangeHadBeenMade = true;
+        }
+        private void UpdateRemarkLabel(int Line, bool Ischecked, string LabelName) 
+        {
+            StringBuilder Msg = new StringBuilder();
+            if (Ischecked == true)
+            {
+                Msg.AppendFormat("The Label {0} became Remark, after update ie will appaer in Remark List", LabelName);
+                MessageBox.Show(Msg.ToString());
+                this.m_NumberLabelRemark++;
+                this.m_NumberLabel--;
+                if (m_NumberLabel == 0 )
+                {
+                   ButtomRemarkList.Text = "  Hide Remarks  ";
+                }
+            }
+            else
+            {
+                Msg.AppendFormat("The Label {0} became No Remark", LabelName);
+                MessageBox.Show(Msg.ToString());
+                this.m_NumberLabelRemark--;
+                this.m_NumberLabel++;
+                if (m_NumberLabelRemark == 0)
+                {
+                    ButtomRemarkList.Text = "Show Remarks";
+                }
+            }
+            int res = m_PropertiesTable.MakeLabelRemark(Line, Ischecked);
+            if (res == 0)
+            {
+                m_ChangeHadBeenMade = true;
+             
+            }
+
+        }
+        private void UpdateLineSelected(Line CurLine, bool IsSelected)
+        {
+            if (m_CurLineSelected != null)
+            {
+                m_CurLineSelected.LineUnSelected();
+            }
+
+            if (m_CurLineSelected != CurLine) 
+            {
+                CurLine.LineSelected();
+                m_CurLineSelected = CurLine;
+            }
+            else // the line that was select is noe unselected and there is no more new line that has been selected
+            {
+                m_CurLineSelected = null;
+
+            }
+        }
+
+
+        public void printethetabletoconsole()
+        {
+            m_PropertiesTable.PrintTable();
+        }
+
+        
+    }
+
+} 

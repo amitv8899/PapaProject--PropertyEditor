@@ -1,0 +1,12 @@
+#<@>*FiledRange(1,19)
+#<@>*FieldType(int)
+#<@>*Caption(good!)
+amit=112
+#<@>*FieldType(bool)
+#<@>*Caption(good!)
+adi=true
+adi=14
+#<@>*FieldType(string)
+#<@>*Caption(good!)
+omer="Mefager"
+
