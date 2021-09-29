@@ -31,7 +31,6 @@ namespace PapaProject
         {
             this.LabelName = new System.Windows.Forms.Label();
             this.LabelEqual = new System.Windows.Forms.Label();
-            this.TextBoxVal = new System.Windows.Forms.RichTextBox();
             this.materialContextMenuLine = new MaterialSkin.Controls.MaterialContextMenuStrip();
             this.remarkToolStroMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,19 +56,6 @@ namespace PapaProject
             this.LabelEqual.Size = new System.Drawing.Size(27, 29);
             this.LabelEqual.TabIndex = 1;
             this.LabelEqual.Text = "=";
-            // 
-            // TextBoxVal
-            // 
-            this.TextBoxVal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TextBoxVal.ContextMenuStrip = this.materialContextMenuLine;
-            this.TextBoxVal.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.TextBoxVal.Location = new System.Drawing.Point(177, 7);
-            this.TextBoxVal.Multiline = false;
-            this.TextBoxVal.Name = "TextBoxVal";
-            this.TextBoxVal.Size = new System.Drawing.Size(740, 37);
-            this.TextBoxVal.TabIndex = 2;
-            this.TextBoxVal.Text = "";
             // 
             // materialContextMenuLine
             // 
@@ -116,11 +102,10 @@ namespace PapaProject
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ContextMenuStrip = this.materialContextMenuLine;
-            this.Controls.Add(this.TextBoxVal);
             this.Controls.Add(this.LabelEqual);
             this.Controls.Add(this.LabelName);
             this.Name = "Line";
-            this.Size = new System.Drawing.Size(925, 62);
+            this.Size = new System.Drawing.Size(590, 62);
             this.Load += new System.EventHandler(this.Line_Load);
             this.materialContextMenuLine.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -131,7 +116,7 @@ namespace PapaProject
 
         private System.Windows.Forms.Label LabelName;
         private System.Windows.Forms.Label LabelEqual;
-        private System.Windows.Forms.RichTextBox TextBoxVal;
+        //private System.Windows.Forms.RichTextBox TextBoxVal;
         ////private System.Windows.Forms.CheckBox checkBoxRemark;
         private MaterialSkin.Controls.MaterialContextMenuStrip materialContextMenuLine;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;

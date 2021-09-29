@@ -122,8 +122,8 @@ namespace PapaProject
                 }
                 if ((NewLine[0].ToString() == eTypes.Label.ToString()) || (m_NeedShowLabelRemark && (NewLine[0].ToString() == eTypes.LabelRemark.ToString())))
                 {
-                    m_LineArray.Add(new Line());
-                    m_LineArray.Last<Line>().InitializeNewLine(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine);
+                    m_LineArray.Add(new Line(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine));
+                    //m_LineArray.Last<Line>().InitializeNewLine(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine);
                     m_LineArray.Last<Line>().TaxBoxValChangedInvoker += UpdateTable;
                     m_LineArray.Last<Line>().CheckBoxRemarkChangeInvoker += UpdateRemarkLabel;
                     m_LineArray.Last<Line>().LineSelectedInvoker += UpdateLineSelected;

@@ -17,13 +17,103 @@ namespace PapaProject
         private string m_Range;
         private string m_Type;
         private string m_Caption;
+        private Control m_Input;
         public event Action<int, string> TaxBoxValChangedInvoker;
         public event Action<int, bool, string> CheckBoxRemarkChangeInvoker;
         public event Action<Line, bool> LineSelectedInvoker;
+
        
-        public Line()
+        public Line(string LabelName, string Value, string Range, string Type, string Caption, int NumberLine)
         {
             InitializeComponent();
+            //Label Name
+            this.LabelName.Text = LabelName;
+
+            //Label Equal
+            
+
+            //this
+            m_NumberLine = NumberLine;
+            m_Range = Range;
+            m_Type = Type;
+            m_Caption = Caption;
+
+            // Input
+            CreateInputControl();
+            this.m_Input.Text = Value;
+            this.Controls.Add(this.m_Input);
+
+
+        }
+        private void  CreateInputControl()
+        {
+
+            if (m_Type == "bool")
+            {
+                ComboBox temp = new System.Windows.Forms.ComboBox();
+                temp.Items.Add("True");
+                temp.Items.Add("False");
+                m_Input = temp;
+
+
+            }
+            else if (m_Type == "int" && m_Range != string.Empty)
+            {
+                NumericUpDown temp = new System.Windows.Forms.NumericUpDown();
+                GetMinAndMaxFormString(m_Range, out int Min, out int Max);
+                temp.Maximum = Max;
+                temp.Minimum = Min;
+                m_Input = temp;
+
+            }
+            else// string or doenot have type
+            {
+                RichTextBox temp = new System.Windows.Forms.RichTextBox();
+                temp.Multiline = true;
+                m_Input = temp;
+            }
+        }
+        private int GetMinAndMaxFormString(string Range, out int Min, out int Max)
+        {
+            int res = 0;
+            bool curIsMin = true;
+            StringBuilder MinStr = new StringBuilder();
+            StringBuilder MaxStr = new StringBuilder();
+
+
+            foreach (char ch in Range)
+            {
+
+                if (curIsMin)
+                {
+                    if (ch != ',') 
+                    {
+                        MinStr.Append(ch);
+                    }
+                }
+                else
+                {
+                    MaxStr.Append(ch);
+
+
+                }
+                if (ch == ',')
+                {
+                    curIsMin = false;
+
+                }
+            }
+
+            if (!Int32.TryParse(MinStr.ToString(), out Min))
+            {
+                Min = 0;
+            }
+            if (!Int32.TryParse(MaxStr.ToString(), out Max))
+            {
+                Max = 0;
+            }
+            
+            return res;      
         }
 
         private void Line_Load(object sender, EventArgs e)
@@ -37,10 +127,14 @@ namespace PapaProject
             this.LabelEqual.Location = new Point(this.LabelName.Right, LabelName.Top);
             this.LabelEqual.Click += new EventHandler(Line_Clicked);
             //text box val
-            this.TextBoxVal.Location = new Point(LabelEqual.Right, LabelName.Top);
-            this.TextBoxVal.TextChanged += new EventHandler(TextBoxVal_Changed);
-            this.TextBoxVal.Multiline = true;
-            
+            //this.TextBoxVal.Location = new Point(LabelEqual.Right, LabelName.Top);
+            //this.TextBoxVal.TextChanged += new EventHandler(TextBoxVal_Changed);
+            //this.TextBoxVal.Multiline = true;
+
+            // Input
+            this.m_Input.Location = new Point(LabelEqual.Right, LabelName.Top);
+            this.m_Input.TextChanged += new EventHandler(TextBoxVal_Changed);
+            this.m_Input.Size = new Size(182,31);
 
             ////check box
             ////this.checkBoxRemark.CheckedChanged += new EventHandler(CheckBoxRemark_ChangeVal);
@@ -48,13 +142,15 @@ namespace PapaProject
 
             // ContextMenu
             this.materialContextMenuLine.Opened += new EventHandler(MaterialContextMenuLine_Clicked);
+            this.materialContextMenuLine.Opened += new EventHandler(Line_Clicked);
             //RemarkContextMenue
             this.remarkToolStroMenuItem.Click += new EventHandler(RemarkToolStroMenuItem_Clicked);
            
 
 
             //this
-            this.Size = new Size(LabelName.Size.Width + LabelEqual.Size.Width + TextBoxVal.Size.Width, TextBoxVal.Size.Height);
+            this.Size = new Size(LabelName.Size.Width + LabelEqual.Size.Width + m_Input.Size.Width, m_Input.Size.Height);
+            //this.Size = new Size(LabelName.Size.Width + LabelEqual.Size.Width + TextBoxVal.Size.Width, TextBoxVal.Size.Height);
 
 
         }
@@ -69,28 +165,19 @@ namespace PapaProject
 
             this.LabelName.BackColor = Color.LightYellow;
             this.LabelEqual.BackColor =  Color.LightYellow;
-            this.TextBoxVal.BackColor = Color.LightYellow;
+            this.m_Input.BackColor = Color.LightYellow;
+            //this.TextBoxVal.BackColor = Color.LightYellow;
             this.BackColor = Color.LightYellow;
 
-            //this.LabelName.ForeColor = Color.DarkRed;
-            //this.LabelName.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            //this.LabelEqual.ForeColor = Color.DarkRed;
-            //this.LabelEqual.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            //this.TextBoxVal.ForeColor = Color.DarkRed;
-            //this.TextBoxVal.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
         }
         public void LineUnSelected()
         {
             this.LabelName.BackColor = Color.Empty;
             this.LabelEqual.BackColor = Color.Empty;
-            this.TextBoxVal.BackColor = Color.Empty;
+            this.m_Input.BackColor = Color.Empty;
+            //this.TextBoxVal.BackColor = Color.Empty;
             this.BackColor = Color.Empty;
-            //this.LabelName.ForeColor = Color.Black;
-            //this.LabelName.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            //this.LabelEqual.ForeColor = Color.Black;
-            //this.LabelEqual.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            //this.TextBoxVal.ForeColor = Color.Black;
-            //this.TextBoxVal.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+           
         }
         protected virtual void OnSelectedLine(bool IsSelected)
         {
@@ -102,7 +189,7 @@ namespace PapaProject
         private void MaterialContextMenuLine_Clicked(object sender, EventArgs e)
         {
             MaterialSkin.Controls.MaterialContextMenuStrip CurrentContextMenuStrip = (MaterialSkin.Controls.MaterialContextMenuStrip)sender;
-            if (this.TextBoxVal.Enabled==false)
+            if (this.m_Input.Enabled == false)
             {
                 this.remarkToolStroMenuItem.Text = "Unremark";
             }
@@ -110,6 +197,14 @@ namespace PapaProject
             {
                 this.remarkToolStroMenuItem.Text = "Remark";
             }
+            //if (this.TextBoxVal.Enabled==false)
+            //{
+            //    this.remarkToolStroMenuItem.Text = "Unremark";
+            //}
+            //else
+            //{
+            //    this.remarkToolStroMenuItem.Text = "Remark";
+            //}
         }
      
         private void RemarkToolStroMenuItem_Clicked(object sender, EventArgs e)
@@ -118,12 +213,14 @@ namespace PapaProject
             bool IsBecameRemark = true;
             if (toolStripMenuItem.Text == "Remark")// need to make line remark and the  
             {
-                this.TextBoxVal.Enabled = false;
+                this.m_Input.Enabled = false;
+                //this.TextBoxVal.Enabled = false;
                
             }
             else
             {
-                this.TextBoxVal.Enabled = true;
+                this.m_Input.Enabled = true;
+                //this.TextBoxVal.Enabled = true;
                
                 IsBecameRemark = false;
             }
@@ -159,7 +256,7 @@ namespace PapaProject
         ////}
         private void TextBoxVal_Changed(object sender, EventArgs e)
         {
-            RichTextBox CurrentVal = (RichTextBox)sender;
+            Control CurrentVal = (Control)sender;
             OnChangedVal(CurrentVal.Text);
         }
         protected virtual void OnChangedVal(string Val)
@@ -188,7 +285,7 @@ namespace PapaProject
             }
             if (this.m_Type != string.Empty)
             { 
-                     PopMsg.AppendFormat("{0}Type :{1}", System.Environment.NewLine, this.m_Type);
+                PopMsg.AppendFormat("{0}Type :{1}", System.Environment.NewLine, this.m_Type);
             }
             m_Popup.Items.Add(PopMsg.ToString());
             Point PopLocation = new Point(MousePosition.X-10, MousePosition.Y+16);
@@ -201,26 +298,27 @@ namespace PapaProject
         }
         public void MakeLineInaccessible()
         {
-            this.TextBoxVal.Enabled = false;
-            ////this.checkBoxRemark.Checked = true;
+            this.m_Input.Enabled = false;
+            //this.TextBoxVal.Enabled = false;
+          
 
         }
-        public void InitializeNewLine(string LabelName,string Value, string Range, string Type, string Caption, int NumberLine)
-        {
-            //Label Name
-            this.LabelName.Text = LabelName;
+        //public void InitializeNewLine(string LabelName,string Value, string Range, string Type, string Caption, int NumberLine)
+        //{
+        //    //Label Name
+        //    this.LabelName.Text = LabelName;
 
-            //Label Equal
+        //    //Label Equal
 
-            //Text box Val
-            this.TextBoxVal.Text = Value;
+        //    //Text box Val
+        //    this.TextBoxVal.Text = Value;
             
-            //this
-            m_NumberLine = NumberLine;
-            m_Range = Range;
-            m_Type = Type;
-            m_Caption = Caption;
-        }
+        //    //this
+        //    m_NumberLine = NumberLine;
+        //    m_Range = Range;
+        //    m_Type = Type;
+        //    m_Caption = Caption;
+        //}
 
        
     }
