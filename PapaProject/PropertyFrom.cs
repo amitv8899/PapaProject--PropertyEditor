@@ -91,7 +91,7 @@ namespace PapaProject
             }
             m_Newfile.CloseFile(); // close file , table is ready
         }
-        public int InitializeAllLine() // initialize from to user 
+        public int InitializeAllLine() // initialize form from the table to user 
         {
             m_LineArray = new List<Line>();
             StringBuilder[] NewLine;
@@ -99,7 +99,7 @@ namespace PapaProject
             int IndexForLine = 1;
             int ToReturn = 0;
             m_NumberLabel = 0; // make zero again
-            m_NumberLabelRemark = 0;// make zero again0
+            m_NumberLabelRemark = 0;// make zero again
             //# check if table is empty!
             while (MoreLineInTable)
             {
@@ -169,8 +169,8 @@ namespace PapaProject
             }
             if (result == DialogResult.Yes)
             {
-                e.Cancel = false;
-                m_ChangeHadBeenMade = false;
+                e.Cancel = false;//close form
+                m_ChangeHadBeenMade = false; 
                 m_NeedShowLabelRemark = false;
             }
             else 
@@ -313,12 +313,12 @@ namespace PapaProject
         {
             if (m_CurLineSelected != null)
             {
-                m_CurLineSelected.LineUnSelected();
+                m_CurLineSelected.LineUnSelected();// make the kine as unselected one
             }
 
             if (m_CurLineSelected != CurLine) 
             {
-                CurLine.LineSelected();
+                CurLine.LineSelected(); // make the line selected
                 m_CurLineSelected = CurLine;
             }
             else // the line that was select is noe unselected and there is no more new line that has been selected
@@ -331,7 +331,7 @@ namespace PapaProject
 
         public void printethetabletoconsole()
         {
-            m_PropertiesTable.PrintTable();
+            m_PropertiesTable.PrintTable();// printe the table to console
         }
 
         
