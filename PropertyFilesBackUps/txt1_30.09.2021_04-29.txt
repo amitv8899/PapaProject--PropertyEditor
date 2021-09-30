@@ -1,14 +1,15 @@
 #<@>*FiledRange(1,19)
 #<@>*FieldType(int)
 #<@>*Caption(good!)
-amit=10
+amit=19
 #<@>*FieldType(bool)
 #<@>*Caption(good!)
-val=true
+adi=true
+#<@>*Caption(good!)
+#asad=14\
+#12\
+#1
 #<@>*FieldType(string)
 #<@>*Caption(good!)
 omer="Mefager"
-#<@>*FieldType(bool)
-#<@>*Caption(good!)
-adi=False
 

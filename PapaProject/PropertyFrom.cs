@@ -122,8 +122,15 @@ namespace PapaProject
                 }
                 if ((NewLine[0].ToString() == eTypes.Label.ToString()) || (m_NeedShowLabelRemark && (NewLine[0].ToString() == eTypes.LabelRemark.ToString())))
                 {
-                    m_LineArray.Add(new Line(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine));
-                    //m_LineArray.Last<Line>().InitializeNewLine(NewLine[(int)eColumns.Label].ToString(), NewLine[(int)eColumns.Value].ToString(), NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine);
+                    string LabelName = NewLine[(int)eColumns.Label].ToString();
+                    string LabelVal = NewLine[(int)eColumns.Value].ToString();
+                    if (NewLine[0].ToString() == eTypes.LabelRemark.ToString())// if label remark need to remove all # in line
+                    {
+                        LabelName = LabelName.Replace("#","");
+                        LabelVal = LabelVal.Replace("#","");
+
+                    }
+                    m_LineArray.Add(new Line(LabelName, LabelVal, NewLine[(int)eColumns.Range].ToString(), NewLine[(int)eColumns.FieldType].ToString(), NewLine[(int)eColumns.Note].ToString(), IndexForLine));
                     m_LineArray.Last<Line>().TaxBoxValChangedInvoker += UpdateTable;
                     m_LineArray.Last<Line>().CheckBoxRemarkChangeInvoker += UpdateRemarkLabel;
                     m_LineArray.Last<Line>().LineSelectedInvoker += UpdateLineSelected;
@@ -131,7 +138,6 @@ namespace PapaProject
                     {
                         m_LineArray.Last<Line>().MakeLineInaccessible();
                     }
-                    /// here add as invker to check box!
                     if (this.FlowAllLine.Controls.Count < 0)
                     {
                         this.FlowAllLine.Controls.Clear();
@@ -259,7 +265,7 @@ namespace PapaProject
             m_PropertiesTable.ChangeValueInTable(Line, NewVal);
             m_ChangeHadBeenMade = true;
         }
-        private void UpdateRemarkLabel(int Line, bool Ischecked, string LabelName) 
+        private void UpdateRemarkLabel(int LineNumber, bool Ischecked, string LabelName, string LabelVal) 
         {
             StringBuilder Msg = new StringBuilder();
             if (Ischecked == true)
@@ -284,7 +290,18 @@ namespace PapaProject
                     ButtomRemarkList.Text = "Show Remarks";
                 }
             }
-            int res = m_PropertiesTable.MakeLabelRemark(Line, Ischecked);
+            if (Ischecked)//This is a remark label need to add # in the start and in every new line (go on val) (after every \ add #)
+            {
+
+                LabelName = LabelName.Insert(0,"#");// add in the start # to mark it as remark in file 
+                LabelVal = LabelVal.Replace("\\","\\#");
+            }
+            else
+            {
+                LabelVal = LabelVal.Replace("#", "");// all the # need to be deleted
+
+            }
+            int res = m_PropertiesTable.MakeLabelRemark(LineNumber, Ischecked, LabelName, LabelVal);
             if (res == 0)
             {
                 m_ChangeHadBeenMade = true;

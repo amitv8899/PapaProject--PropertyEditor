@@ -19,7 +19,7 @@ namespace PapaProject
         private string m_Caption;
         private Control m_Input;
         public event Action<int, string> TaxBoxValChangedInvoker;
-        public event Action<int, bool, string> CheckBoxRemarkChangeInvoker;
+        public event Action<int, bool, string, string> CheckBoxRemarkChangeInvoker;
         public event Action<Line, bool> LineSelectedInvoker;
 
        
@@ -126,19 +126,13 @@ namespace PapaProject
             //Equal label
             this.LabelEqual.Location = new Point(this.LabelName.Right, LabelName.Top);
             this.LabelEqual.Click += new EventHandler(Line_Clicked);
-            //text box val
-            //this.TextBoxVal.Location = new Point(LabelEqual.Right, LabelName.Top);
-            //this.TextBoxVal.TextChanged += new EventHandler(TextBoxVal_Changed);
-            //this.TextBoxVal.Multiline = true;
-
+           
             // Input
             this.m_Input.Location = new Point(LabelEqual.Right, LabelName.Top);
             this.m_Input.TextChanged += new EventHandler(TextBoxVal_Changed);
             this.m_Input.Size = new Size(182,31);
 
-            ////check box
-            ////this.checkBoxRemark.CheckedChanged += new EventHandler(CheckBoxRemark_ChangeVal);
-
+           
 
             // ContextMenu
             this.materialContextMenuLine.Opened += new EventHandler(MaterialContextMenuLine_Clicked);
@@ -150,8 +144,7 @@ namespace PapaProject
 
             //this
             this.Size = new Size(LabelName.Size.Width + LabelEqual.Size.Width + m_Input.Size.Width, m_Input.Size.Height);
-            //this.Size = new Size(LabelName.Size.Width + LabelEqual.Size.Width + TextBoxVal.Size.Width, TextBoxVal.Size.Height);
-
+           
 
         }
         private void Line_Clicked(object sender, EventArgs e)
@@ -166,7 +159,6 @@ namespace PapaProject
             this.LabelName.BackColor = Color.LightYellow;
             this.LabelEqual.BackColor =  Color.LightYellow;
             this.m_Input.BackColor = Color.LightYellow;
-            //this.TextBoxVal.BackColor = Color.LightYellow;
             this.BackColor = Color.LightYellow;
 
         }
@@ -175,7 +167,6 @@ namespace PapaProject
             this.LabelName.BackColor = Color.Empty;
             this.LabelEqual.BackColor = Color.Empty;
             this.m_Input.BackColor = Color.Empty;
-            //this.TextBoxVal.BackColor = Color.Empty;
             this.BackColor = Color.Empty;
            
         }
@@ -197,14 +188,6 @@ namespace PapaProject
             {
                 this.remarkToolStroMenuItem.Text = "Remark";
             }
-            //if (this.TextBoxVal.Enabled==false)
-            //{
-            //    this.remarkToolStroMenuItem.Text = "Unremark";
-            //}
-            //else
-            //{
-            //    this.remarkToolStroMenuItem.Text = "Remark";
-            //}
         }
      
         private void RemarkToolStroMenuItem_Clicked(object sender, EventArgs e)
@@ -214,13 +197,13 @@ namespace PapaProject
             if (toolStripMenuItem.Text == "Remark")// need to make line remark and the  
             {
                 this.m_Input.Enabled = false;
-                //this.TextBoxVal.Enabled = false;
+                
                
             }
             else
             {
                 this.m_Input.Enabled = true;
-                //this.TextBoxVal.Enabled = true;
+                
                
                 IsBecameRemark = false;
             }
@@ -231,29 +214,10 @@ namespace PapaProject
         {
             if (CheckBoxRemarkChangeInvoker != null)
             {
-                this.CheckBoxRemarkChangeInvoker.Invoke(m_NumberLine, IsChecked, this.LabelName.Text);
+                this.CheckBoxRemarkChangeInvoker.Invoke(m_NumberLine, IsChecked, this.LabelName.Text,this.m_Input.Text);
             }
         }
-        ////private void CheckBoxRemark_ChangeVal(object sender, EventArgs e)
-        ////{
-        ////    CheckBox CurrentCheckBox = (CheckBox)sender;
-        ////    if (CurrentCheckBox.Checked == true)
-        ////    {
-        ////        this.TextBoxVal.Enabled = false;
-        ////    }
-        ////    else
-        ////    {
-        ////        this.TextBoxVal.Enabled = true;
-        ////    }
-        ////    OnChangedCheckBox(CurrentCheckBox.Checked);
-        ////}
-        ////protected virtual void OnChangedCheckBox(bool IsChecked)
-        ////{
-        ////    if (CheckBoxRemarkChangeInvoker != null)
-        ////    {
-        ////        this.CheckBoxRemarkChangeInvoker.Invoke(m_NumberLine, IsChecked, this.LabelName.Text);
-        ////    }
-        ////}
+        
         private void TextBoxVal_Changed(object sender, EventArgs e)
         {
             Control CurrentVal = (Control)sender;
@@ -273,7 +237,6 @@ namespace PapaProject
             m_Popup.Padding = Padding.Empty;
             StringBuilder PopMsg = new StringBuilder();
             PopMsg.Append(Current.Text);
-            string Temp;
             if (this.m_Caption != string.Empty)
             {
                 
@@ -299,26 +262,8 @@ namespace PapaProject
         public void MakeLineInaccessible()
         {
             this.m_Input.Enabled = false;
-            //this.TextBoxVal.Enabled = false;
-          
-
         }
-        //public void InitializeNewLine(string LabelName,string Value, string Range, string Type, string Caption, int NumberLine)
-        //{
-        //    //Label Name
-        //    this.LabelName.Text = LabelName;
-
-        //    //Label Equal
-
-        //    //Text box Val
-        //    this.TextBoxVal.Text = Value;
-            
-        //    //this
-        //    m_NumberLine = NumberLine;
-        //    m_Range = Range;
-        //    m_Type = Type;
-        //    m_Caption = Caption;
-        //}
+       
 
        
     }

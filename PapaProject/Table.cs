@@ -16,7 +16,7 @@ namespace PapaProject
         private bool m_PartOfPropertyVal = false;
      
 
-
+        /// Genral============================================================
         public int IntinitializeNewTableFromFile(int LinesFromFile)
         {
             int res = 1;
@@ -99,6 +99,60 @@ namespace PapaProject
             }
             Console.WriteLine(Table);
         }
+        public StringBuilder[] LineTable(int LineNumber)
+        {
+
+            StringBuilder[] LineToReturn = new StringBuilder[m_NumberOfColunms];
+            if (LineNumber >= m_CurrentLine || LineNumber == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < m_NumberOfColunms; i++)
+            {
+                LineToReturn[i] = this.m_ProperitiesTable[LineNumber, i];
+
+            }
+            return LineToReturn;
+        }
+        public string LineTableInOneStr(int LineNumber)
+        {
+            StringBuilder LineToReturn = new StringBuilder();
+            StringBuilder temp = new StringBuilder();
+
+
+            if (LineNumber >= m_CurrentLine || LineNumber <= 0 || m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString() == string.Empty)
+            {
+                return null;
+            }
+            LineToReturn.Append(m_ProperitiesTable[LineNumber, (int)eColumns.Label]);
+            if ((m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString() == eTypes.LabelRemark.ToString()) || (m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString() == eTypes.Label.ToString()))// need to add =
+            {
+                LineToReturn.Append("=");
+                int NumberIndex = 0;
+                foreach (char ch in m_ProperitiesTable[LineNumber, (int)eColumns.Value].ToString())
+                {
+
+                    temp.Append(ch);
+
+                    if (ch == '\\')// need to add new line in the file 
+                    {
+                        if (IsLinePartOfPropertyVal(NumberIndex, m_ProperitiesTable[LineNumber, (int)eColumns.Value].ToString()))
+                        {
+                            temp.Append(System.Environment.NewLine);
+                        }
+
+
+                    }
+                    NumberIndex++;
+                }
+                LineToReturn.Append(temp);
+
+            }
+            return LineToReturn.ToString();
+        }
+        ///=========================================================================
+        ///check====================================================================
         private bool CheckIsLineRemark(string Line)
         {
            
@@ -152,6 +206,300 @@ namespace PapaProject
 
             return res;
         }
+        private string IsLineLabelRamark(string Line)// if true this function return new line without labelRemaek if false return null
+        {
+            StringBuilder First4char = new StringBuilder();
+
+            if (IsLabelRemark(Line))
+                return Line.Remove(0, 1);// remove # or !
+            else
+                return null;
+        }
+        private bool IsSystemRemark(string Remark)
+        {
+            return Remark.ToString().Contains(Constants.SystemRemark);// system remark!!!
+        }
+        private bool IsLabelRemark(string Remark)
+        {
+            return (Remark.ToString().Contains(Constants.Remark1) || Remark.ToString().Contains(Constants.Remark2)) && (Remark.ToString().Contains("=") || m_PartOfPropertyVal);// Label remark!!!
+        }
+        private int CheckIndexOfStrAndReturn(string StrToCheck)
+        {
+            int res = -1;
+
+
+            if (StrToCheck.StartsWith(Constants.SystemFieldRange))
+            {
+                res = (int)eSystemRemark.FiledRange;
+            }
+            else if (StrToCheck.StartsWith(Constants.SystemFieldType))
+            {
+                res = (int)eSystemRemark.FieldType;
+            }
+            else if (StrToCheck.StartsWith(Constants.SystemCaption))
+            {
+                res = (int)eSystemRemark.Caption;
+            }
+
+            return res;
+        }
+        private bool CheckIsPartOfPropertyVal(string Line)
+        {
+            return (Line[(Line.Length) - 1] == '\\') && (Line[(Line.Length) - 2] != '\\');
+        }
+        private void FillLabelRemark(out List<StringBuilder> ListOfRemark)
+        {
+            ListOfRemark = new List<StringBuilder>();//[0]= Range, [1]= tyep, [2] = caption and others
+            ListOfRemark.Add(new StringBuilder(string.Empty));
+            ListOfRemark.Add(new StringBuilder(string.Empty));
+            ListOfRemark.Add(new StringBuilder(string.Empty));
+            int CounterUp = m_CurrentLine - 1;
+            bool KeepGoing = true;
+            int Index = -1;
+            while (KeepGoing)
+            {
+                if (CounterUp == 0 || m_ProperitiesTable[CounterUp, (int)eColumns.Type].ToString() != eTypes.SystemRemark.ToString())
+                {
+                    KeepGoing = false;
+                    break;
+                }
+
+
+                Index = CheckIndexOfStrAndReturn(m_ProperitiesTable[CounterUp, (int)eColumns.Label].ToString());
+                if (Index != -1)
+                {
+                    ListOfRemark[Index] = new StringBuilder(m_ProperitiesTable[CounterUp, (int)eColumns.Value].ToString());
+                }
+                //else send problem!
+
+                CounterUp--;
+            }
+        }
+        private bool IsLinePartOfPropertyVal(int IndexToCheck, string StrToCheck)
+        {
+            bool ToReturn = false;
+
+            if (StrToCheck[IndexToCheck + 1] != '\\' && StrToCheck[IndexToCheck - 1] != '\\')
+            {
+                ToReturn = true;
+            }
+            return ToReturn;
+        }
+        ///===================================================================
+        /// Get =================================================================
+        private string GetValFromSystemRemark(string Line)
+        {
+            StringBuilder ValRes = new StringBuilder(string.Empty); ;
+            bool NeedCopy = false;
+
+            foreach(char ch in Line)
+            {
+                if (ch == ')') // before we copy ) we need to stop 
+                {
+                    NeedCopy = false;
+                    break;
+                }
+                if (NeedCopy == true)
+                {
+                    ValRes.Append(ch);
+                }
+                if (ch == '(') // need to copy the next ch 
+                {
+                    NeedCopy = true;
+                }
+                 
+            }
+            
+            return ValRes.ToString();
+        }
+        private string GetLabelFromLine(string Line, out int EqualIndex) // isolate label from Line
+        {
+            EqualIndex=0;
+            StringBuilder CurrentLabel = new StringBuilder();
+            foreach(char ch in Line)
+            {
+                if (ch != '=' && ch != ':')
+                {
+                    CurrentLabel.Append(ch);
+                    EqualIndex++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (EqualIndex == Line.Length)// There is no = or : in the line need to send error! 
+            {
+                EqualIndex = 0;// 0 = not valid index for Line , not valid line in the text
+            }
+            return CurrentLabel.ToString();
+        }
+        private eTypes GetLineType(string Line)
+        {
+            eTypes res;
+            if (CheckIsLineRemark(Line))
+            {
+                res = eTypes.Remark;
+            }
+            else if (IsSystemRemark(Line))
+            {
+                res = eTypes.SystemRemark;
+            }
+            else if (CheckIsLineAllSpaceses(Line))
+            {
+                res = eTypes.Spaces;
+            }
+            else if (IsLabelRemark(Line))
+            {
+                res = eTypes.LabelRemark;
+            }
+            else
+            {
+                res = eTypes.Label;
+            }
+            return res;
+
+        }
+        public string GetTypeFronTable(int Row)
+        {
+            return m_ProperitiesTable[Row, (int)eColumns.Type].ToString();
+        }
+        public string GetLabelFronTable(int Row)
+        {
+            return m_ProperitiesTable[Row, (int)eColumns.Label].ToString();
+        }
+        public string GetValueFronTable(int Row)
+        {
+            return m_ProperitiesTable[Row, (int)eColumns.Value].ToString();
+        }
+        public string GetRangeFronTable(int Row)
+        {
+
+            StringBuilder ResRange = new StringBuilder();
+            ResRange.Append(m_ProperitiesTable[Row, (int)eColumns.Range]);
+            ResRange.Append(" to ");
+            ResRange.Append(m_ProperitiesTable[Row, (int)eColumns.FieldType]);
+
+
+            return ResRange.ToString();
+        }
+        public string GetNoteFronTable(int Row)
+        {
+
+            return m_ProperitiesTable[Row, (int)eColumns.Note].ToString();
+        }
+        ///===========================================================================
+        /// insert new ====================================================================
+        private int InsertGoOnProperty(string Line, int Row)
+        {
+            int res = 0;
+                if (!CheckIsPartOfPropertyVal(Line)) 
+                 m_PartOfPropertyVal = false;//the last val of this label
+
+            m_ProperitiesTable[Row, (int)eColumns.Value].Append(Line);
+            if (!m_PartOfPropertyVal) 
+            {
+                m_CurrentLine++; 
+            }
+
+            return res;
+        }
+        public  int InsertLineToTable(string Line)
+        {
+            int res = 0;
+
+            if (m_PartOfPropertyVal == true)// this line is the go on val of the last label that had been insrted 
+            {
+                res = InsertGoOnProperty(Line, m_CurrentLine);
+            }
+            else // if line is not go on val of label need to find the type and insert
+            {
+                eTypes LineType = GetLineType(Line);
+
+                switch (LineType)
+                {
+                    case eTypes.Label:
+                        InsertNewLabel(Line, m_CurrentLine);
+                        break;
+                    case eTypes.LabelRemark:
+                        InsertNewLabelRemark(Line, m_CurrentLine);
+                        break;
+                    case eTypes.Remark:
+                        res = InsertNewRemark(Line, m_CurrentLine);
+                        break;
+                    case eTypes.SystemRemark:
+                        res = InsertNewSystemRemark(Line, m_CurrentLine);
+                        break;
+                    case eTypes.Spaces:
+                        res = InsertNewSpacese(Line, m_CurrentLine);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return res;
+        }
+        private int InsertNewLabel(string Line, int row)
+        {
+            ChangeTypeInTable(row, eTypes.Label.ToString());
+            ChangeLabelInTable(row, GetLabelFromLine(Line, out int EqualIndex));
+            if (EqualIndex == 0)
+            {
+                return 1;// no valid Line!, need to exit this funcation! send error!
+            }
+            m_PartOfPropertyVal = CheckIsPartOfPropertyVal(Line);
+            Line = Line.Substring(EqualIndex + 1);// get the rest of the line without the label 
+
+            FillLabelRemark(out List<StringBuilder> ListOfRemark);
+            if (m_PartOfPropertyVal == false)
+            {
+                m_CurrentLine++;// be ready to next insert (line)
+            }
+            ChangeValueInTable(row, Line);// get val without = .
+            ChangeRngeInTable(row, ListOfRemark[(int)eSystemRemark.FiledRange].ToString());
+            ChangeFeildTypeInTable(row, ListOfRemark[(int)eSystemRemark.FieldType].ToString());
+            ChangeNoteInTable(row, ListOfRemark[(int)eSystemRemark.Caption].ToString());
+
+
+            return 0;
+        }
+        private int InsertNewSpacese(string Line, int Row)
+        {
+            ChangeTypeInTable(Row, eTypes.Spaces.ToString());
+            ChangeLabelInTable(Row, string.Empty);
+            ChangeValueInTable(Row, Line);//empty string = 0 spaces
+            ChangeRngeInTable(Row, string.Empty);
+            ChangeFeildTypeInTable(Row, string.Empty);
+            ChangeNoteInTable(Row, string.Empty);
+
+            m_CurrentLine++;// be ready to next insert
+            return 0;
+        }
+        private int InsertNewLabelRemark(string Line, int row)
+        {
+            int res = 0;
+            ChangeTypeInTable(row, eTypes.LabelRemark.ToString());
+            ChangeLabelInTable(row, GetLabelFromLine(Line, out int EqualIndex));
+            if (EqualIndex == 0)
+            {
+                return 1;// no valid Line!, need to exit this funcation! send error!
+            }
+            m_PartOfPropertyVal = CheckIsPartOfPropertyVal(Line);
+            Line = Line.Substring(EqualIndex + 1);// get the rest of the line without the label 
+            FillLabelRemark(out List<StringBuilder> ListOfRemark);
+            if (m_PartOfPropertyVal == false)
+            {
+                m_CurrentLine++;// be ready to next insert (line)
+            }
+            ChangeValueInTable(row, Line);// get val without = .
+            ChangeRngeInTable(row, ListOfRemark[(int)eSystemRemark.FiledRange].ToString());
+            ChangeFeildTypeInTable(row, ListOfRemark[(int)eSystemRemark.FieldType].ToString());
+            ChangeNoteInTable(row, ListOfRemark[(int)eSystemRemark.Caption].ToString());
+
+
+
+            return res;
+        }
         private int InsertNewRemark(string Line, int Row)
         {
             eTypes TypeLine = eTypes.Remark;
@@ -178,235 +526,17 @@ namespace PapaProject
             m_CurrentLine++;// be ready to next insert
             return 0;
         }
-        private string GetValFromSystemRemark(string Line)
-        {
-            StringBuilder ValRes = new StringBuilder(string.Empty); ;
-            bool NeedCopy = false;
-
-            foreach(char ch in Line)
-            {
-                if (ch == ')') // before we copy ) we need to stop 
-                {
-                    NeedCopy = false;
-                    break;
-                }
-                if (NeedCopy == true)
-                {
-                    ValRes.Append(ch);
-                }
-                if (ch == '(') // need to copy the next ch 
-                {
-                    NeedCopy = true;
-                }
-                 
-            }
-            
-            return ValRes.ToString();
-        }
-        private int InsertNewSpacese(string Line, int Row)
-        {
-            ChangeTypeInTable(Row, eTypes.Spaces.ToString());
-            ChangeLabelInTable(Row, string.Empty);
-            ChangeValueInTable(Row, Line);//empty string = 0 spaces
-            ChangeRngeInTable(Row, string.Empty);
-            ChangeFeildTypeInTable(Row, string.Empty);
-            ChangeNoteInTable(Row, string.Empty);
-
-            m_CurrentLine++;// be ready to next insert
-            return 0;
-        }
-        private int InsertNewLabel(string Line,int row)
-        {
-            
-            string LabelRemarkOrNull = IsLineLabelRamark(Line);
-            eTypes TypeLine = eTypes.Label;
-            if (LabelRemarkOrNull != null)// this line is not label and its remark label 
-            {
-                TypeLine = eTypes.LabelRemark;
-            }
-            else
-                LabelRemarkOrNull = Line;// LabelRemarkOrNull is null so now is not
-            ChangeTypeInTable(row, TypeLine.ToString());
-            ChangeLabelInTable(row, GetLabelFromLine(LabelRemarkOrNull, out int EqualIndex));
-            if (EqualIndex == 0) 
-            {
-                return 1;// no valid Line!, need to exit this funcation! send error!
-            }
-            m_PartOfPropertyVal = CheckIsPartOfPropertyVal(LabelRemarkOrNull);
-            LabelRemarkOrNull = LabelRemarkOrNull.Substring(EqualIndex + 1);// get the rest of the line without the label 
-
-            FillLabelRemark(out List<StringBuilder> ListOfRemark);
-            if (m_PartOfPropertyVal == false)
-            {
-                m_CurrentLine++;// be ready to next insert (line)
-            }
-            ChangeValueInTable(row, LabelRemarkOrNull);// get val without = .
-            ChangeRngeInTable(row, ListOfRemark[(int)eSystemRemark.FiledRange].ToString());
-            ChangeFeildTypeInTable(row, ListOfRemark[(int)eSystemRemark.FieldType].ToString());
-            ChangeNoteInTable(row, ListOfRemark[(int)eSystemRemark.Caption].ToString());
-
-          
-            return 0;
-        }
-        private string IsLineLabelRamark(string Line)// if true this function return new line without labelRemaek if false return null
-        {
-            StringBuilder First4char = new StringBuilder();
-            
-            if (IsLabelRemark(Line))
-                return Line.Remove(0,1);// remove # or !
-            else
-                return null;
-        }
-        private void FillLabelRemark(out List<StringBuilder> ListOfRemark)// infinite loop !!!!!
-        {
-            ListOfRemark = new List<StringBuilder>();//[0]= Range, [1]= tyep, [2] = caption and others
-            ListOfRemark.Add(new StringBuilder(string.Empty));
-            ListOfRemark.Add(new StringBuilder(string.Empty));
-            ListOfRemark.Add(new StringBuilder(string.Empty));
-            int CounterUp = m_CurrentLine-1;
-            bool KeepGoing = true;
-            int Index = -1;
-            while (KeepGoing)
-            {
-                if (CounterUp == 0 || m_ProperitiesTable[CounterUp, (int)eColumns.Type].ToString() != eTypes.SystemRemark.ToString())
-                {
-                    KeepGoing = false;
-                    break;
-                }
-               
-
-                Index = CheckIndexOfStrAndReturn(m_ProperitiesTable[CounterUp, (int)eColumns.Label].ToString());
-                if(Index != -1)
-                {
-                    ListOfRemark[Index] =new StringBuilder(m_ProperitiesTable[CounterUp, (int)eColumns.Value].ToString());
-                }
-                //else send problem!
-
-                CounterUp--;
-            }
-        }
-        private bool IsSystemRemark(string Remark)
-        {
-            return Remark.ToString().Contains(Constants.SystemRemark);// system remark!!!
-        }
-        private bool IsLabelRemark(string Remark)
-        {
-            return (Remark.ToString().Contains(Constants.Remark1)|| Remark.ToString().Contains(Constants.Remark2)) && Remark.ToString().Contains("=");// Label remark!!!
-        }
-        private int CheckIndexOfStrAndReturn(string StrToCheck)
-        {
-            int res=-1;
-            bool StartCopy = false;
-            
-            if (StrToCheck.StartsWith(Constants.SystemFieldRange)) 
-            {
-                res = (int)eSystemRemark.FiledRange;
-            }
-            else if (StrToCheck.StartsWith(Constants.SystemFieldType))
-            {
-                res = (int)eSystemRemark.FieldType;
-            }
-            else if (StrToCheck.StartsWith(Constants.SystemCaption)) 
-            {
-                res = (int)eSystemRemark.Caption;
-            }
-            
-            return res;
-        }
-        private string GetLabelFromLine(string Line, out int EqualIndex) // isolate label from Line
-        {
-            EqualIndex=0;
-            StringBuilder CurrentLabel = new StringBuilder();
-            foreach(char ch in Line)
-            {
-                if (ch != '=' && ch != ':')
-                {
-                    CurrentLabel.Append(ch);
-                    EqualIndex++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if (EqualIndex == Line.Length)// There is no = or : in the line need to send error! 
-            {
-                EqualIndex = 0;// 0 = not valid index for Line , not valid line in the text
-            }
-            return CurrentLabel.ToString();
-        }
-        private bool CheckIsPartOfPropertyVal(string Line)
-        {
-          return (Line[(Line.Length) - 1] == '\\') && (Line[(Line.Length) - 2] != '\\');
-        }
-        private int InsertGoOnProperty(string Line, int Row)
-        {
-            int res = 0;
-                if (!CheckIsPartOfPropertyVal( Line)) 
-                 m_PartOfPropertyVal = false;//the last val of this label
-
-            m_ProperitiesTable[Row, (int)eColumns.Value].Append(Line);
-            if (!m_PartOfPropertyVal) 
-            {
-                m_CurrentLine++; 
-            }
-
-            return res;
-        }
-        public  int InsertLineToTable(string Line)
-        {
-            bool NeedNextCheck = true;
-            int res = 0;
-            if (m_PartOfPropertyVal == true) 
-            {
-                res = InsertGoOnProperty(Line,m_CurrentLine);
-                NeedNextCheck = false;
-            }
-            if (NeedNextCheck && CheckIsLineRemark(Line))
-            {
-               res = InsertNewRemark(Line,m_CurrentLine);
-                NeedNextCheck = false;
-                // insert as remark
-            }
-            if (IsSystemRemark(Line) && NeedNextCheck)
-            {
-                res = InsertNewSystemRemark(Line, m_CurrentLine);
-                NeedNextCheck = false;
-            }
-            if (NeedNextCheck && CheckIsLineAllSpaceses(Line))
-            {
-                res = InsertNewSpacese(Line, m_CurrentLine);
-                NeedNextCheck = false;
-                // insret as spaces
-            }
-            if (NeedNextCheck) 
-            {
-                res = InsertNewLabel(Line,m_CurrentLine);// handle both label and labelremark
-                // insert per col
-            }
-            return res;
-        }
+        ///================================================================================
+        /// Change in table =================================================
         public int ChangeTypeInTable(int Row, string NewType)
         {
             m_ProperitiesTable[Row, (int)eColumns.Type] = new StringBuilder(NewType);
             return 0;
         }
-        public string GetTypeFronTable(int Row)
-        {
-            return m_ProperitiesTable[Row, (int)eColumns.Type].ToString();
-        }
         public int ChangeLabelInTable(int Row, string NewLabel)
         {
             m_ProperitiesTable[Row, (int)eColumns.Label] = new StringBuilder(NewLabel.Trim());
             return 0;
-        }
-        public string GetLabelFronTable(int Row)
-        {
-            return m_ProperitiesTable[Row, (int)eColumns.Label].ToString();
-        }
-        public string GetValueFronTable(int Row)
-        {
-            return m_ProperitiesTable[Row, (int)eColumns.Value].ToString();
         }
         public int ChangeRngeInTable(int Row, string NewFieldType)
         {
@@ -420,111 +550,13 @@ namespace PapaProject
 
             return 1;
         }
-        public string GetRangeFronTable(int Row)
-        {
-
-            StringBuilder ResRange = new StringBuilder();
-            ResRange.Append(m_ProperitiesTable[Row, (int)eColumns.Range]);
-            ResRange.Append(" to ");
-            ResRange.Append(m_ProperitiesTable[Row, (int)eColumns.FieldType]);
-
-
-            return ResRange.ToString();
-        }
         public int ChangeNoteInTable(int Row, string NewVNote)
         {
             m_ProperitiesTable[Row, (int)eColumns.Note] = new StringBuilder(NewVNote);
             return 0;
         }
-        public string GetNoteFronTable(int Row)
-        {
-
-            return m_ProperitiesTable[Row, (int)eColumns.Note].ToString();
-        }
-        public int CurrentLine
-        { 
-            get { return this.m_CurrentLine; }
-            
-        }
-        public int NumberOfColunms
-       {
-            get { return this.m_NumberOfColunms; }
-           
-       }
-        public StringBuilder[] LineTable(int LineNumber)
-        {
-            
-            StringBuilder[] LineToReturn = new StringBuilder[m_NumberOfColunms];
-            if (LineNumber >= m_CurrentLine || LineNumber == 0)
-            {
-                return null;
-            }
-
-            for (int i = 0; i < m_NumberOfColunms; i++)
-            {
-                LineToReturn[i] = this.m_ProperitiesTable[LineNumber, i];
-
-            }
-            return LineToReturn;    
-        }
-        public string LineTableInOneStr(int LineNumber)
-        {
-            StringBuilder LineToReturn = new StringBuilder();
-            StringBuilder temp = new StringBuilder();
-            
-
-            if (LineNumber >= m_CurrentLine || LineNumber <= 0 || m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString()== string.Empty)
-            {
-                return null;
-            }
-            if (m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString() == eTypes.LabelRemark.ToString())
-            {
-
-                LineToReturn.Append(Constants.Remark1);
-
-
-            }
-            LineToReturn.Append(m_ProperitiesTable[LineNumber, (int)eColumns.Label]);
-            if ((m_ProperitiesTable[LineNumber, (int)eColumns.Label].ToString() == eTypes.LabelRemark.ToString()) || (m_ProperitiesTable[LineNumber, (int)eColumns.Type].ToString() == eTypes.Label.ToString()))// need to add =
-            {
-                LineToReturn.Append("=");
-                int NumberIndex = 0;
-                foreach (char ch in m_ProperitiesTable[LineNumber, (int)eColumns.Value].ToString())
-                {
-
-                    temp.Append(ch);
-
-                    if (ch == '\\')
-                    {
-                        if (IsLinePartOfPropertyVal(NumberIndex, m_ProperitiesTable[LineNumber, (int)eColumns.Value].ToString()))
-                        {
-                            temp.Append(System.Environment.NewLine);
-                        }
-
-
-                    }
-                    NumberIndex++;
-                }
-                LineToReturn.Append(temp);
-
-            }
-
-
-
-            return LineToReturn.ToString();
-        }
-        private bool IsLinePartOfPropertyVal(int IndexToCheck, string StrToCheck)
-        {
-            bool ToReturn = false;
-
-            if (StrToCheck[IndexToCheck + 1] != '\\' && StrToCheck[IndexToCheck - 1] != '\\')
-            {
-                ToReturn = true;
-            }
-            return ToReturn;
-        }
-
-        //// Function Property From
+       ///=================================================================================
+       //// Function Property From ===============================================
         public int ChangeValueInTable(int Row, string NewVal)
         {
 
@@ -532,20 +564,36 @@ namespace PapaProject
 
             return 0;
         }
-        public int MakeLabelRemark(int Row, bool IsChecked)
+        public int MakeLabelRemark(int Row, bool IsChecked, string LabelName, string LabelVal)
         {
             StringBuilder NewLabel = new StringBuilder();
-            if (IsChecked == true) 
+            if (IsChecked) 
             {
                 m_ProperitiesTable[Row, (int)eColumns.Type] = new StringBuilder(eTypes.LabelRemark.ToString());
+                m_ProperitiesTable[Row, (int)eColumns.Label] = new StringBuilder(LabelName);
+                m_ProperitiesTable[Row, (int)eColumns.Value] = new StringBuilder(LabelVal);
               
             }
             else// IsChecked == false -> make it back to label
             {
                 m_ProperitiesTable[Row, (int)eColumns.Type] = new StringBuilder(eTypes.Label.ToString());
-               
+                m_ProperitiesTable[Row, (int)eColumns.Label] = new StringBuilder(LabelName);
+                m_ProperitiesTable[Row, (int)eColumns.Value] = new StringBuilder(LabelVal);
+
             }
             return 0;
         }
-}
+        ///=================================================================================
+        /////// get and set====================================================================
+        public int CurrentLine
+        {
+            get { return this.m_CurrentLine; }
+
+        }
+        public int NumberOfColunms
+        {
+            get { return this.m_NumberOfColunms; }
+
+        }
+     }
 }

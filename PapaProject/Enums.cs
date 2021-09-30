@@ -18,7 +18,7 @@ namespace PapaProject
        public enum eTypes
        {
          Remark = 0,
-         SystemRemark =1,
+         SystemRemark = 1,
          LabelRemark =2,
          Spaces = 3,
          Label = 4
