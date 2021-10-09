@@ -10,15 +10,17 @@ namespace PapaProject
      {
         private StringBuilder[,] m_ProperitiesTable;
         private List<string> m_ListOfSystemRemarkForLabel = new List<string> (new string[] {string.Empty, string.Empty, string.Empty });
+        private List<int> m_ListOfTypes = new List<int> (new int[] {0,0,0,0,0});//0=remark,1=systemremark,2=labelremark,3=spaces,4=label
         private int m_NumberOfLines;
         private int m_NumberOfColunms = 6;
-        private int m_CurrentLine = 0;
+        private int m_CurrentLine;
         private bool m_PartOfPropertyVal = false;
      
 
         /// Genral============================================================
         public int IntinitializeNewTableFromFile(int LinesFromFile)
         {
+            m_CurrentLine = 0;
             int res = 1;
             m_NumberOfLines = LinesFromFile;
             if (m_NumberOfLines != 0) 
@@ -26,11 +28,11 @@ namespace PapaProject
                 m_ProperitiesTable = new StringBuilder[m_NumberOfLines+1, m_NumberOfColunms];
 
                 m_ProperitiesTable[m_CurrentLine, (int)eColumns.Type]=new StringBuilder(eColumns.Type.ToString());// remark or spacese
-                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Label]=new StringBuilder(eColumns.Label.ToString());
-                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Value]= new StringBuilder(eColumns.Value.ToString());
-                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Range]= new StringBuilder(eColumns.Range.ToString());
-                m_ProperitiesTable[m_CurrentLine, (int)eColumns.FieldType]= new StringBuilder(eColumns.FieldType.ToString());
-                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Note]= new StringBuilder(eColumns.Note.ToString());
+                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Label] = new StringBuilder(eColumns.Label.ToString());
+                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Value] = new StringBuilder(eColumns.Value.ToString());
+                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Range] = new StringBuilder(eColumns.Range.ToString());
+                m_ProperitiesTable[m_CurrentLine, (int)eColumns.FieldType] = new StringBuilder(eColumns.FieldType.ToString());
+                m_ProperitiesTable[m_CurrentLine, (int)eColumns.Note] = new StringBuilder(eColumns.Note.ToString());
                 m_CurrentLine++;
                 res = 0;
             }
@@ -459,7 +461,7 @@ namespace PapaProject
             ChangeRngeInTable(row, ListOfRemark[(int)eSystemRemark.FiledRange].ToString());
             ChangeFeildTypeInTable(row, ListOfRemark[(int)eSystemRemark.FieldType].ToString());
             ChangeNoteInTable(row, ListOfRemark[(int)eSystemRemark.Caption].ToString());
-
+            m_ListOfTypes[(int)eTypes.Label]++;
 
             return 0;
         }
@@ -471,7 +473,7 @@ namespace PapaProject
             ChangeRngeInTable(Row, string.Empty);
             ChangeFeildTypeInTable(Row, string.Empty);
             ChangeNoteInTable(Row, string.Empty);
-
+            m_ListOfTypes[(int)eTypes.Spaces]++;
             m_CurrentLine++;// be ready to next insert
             return 0;
         }
@@ -495,7 +497,7 @@ namespace PapaProject
             ChangeRngeInTable(row, ListOfRemark[(int)eSystemRemark.FiledRange].ToString());
             ChangeFeildTypeInTable(row, ListOfRemark[(int)eSystemRemark.FieldType].ToString());
             ChangeNoteInTable(row, ListOfRemark[(int)eSystemRemark.Caption].ToString());
-
+            m_ListOfTypes[(int)eTypes.LabelRemark]++;
 
 
             return res;
@@ -509,7 +511,7 @@ namespace PapaProject
             ChangeRngeInTable(Row, string.Empty);
             ChangeFeildTypeInTable(Row, string.Empty);
             ChangeNoteInTable(Row, string.Empty);
-
+            m_ListOfTypes[(int)eTypes.Remark]++;
             m_CurrentLine++;// be ready to next insert
             return 0;
         }
@@ -522,7 +524,7 @@ namespace PapaProject
             ChangeRngeInTable(Row, string.Empty);
             ChangeFeildTypeInTable(Row, string.Empty);
             ChangeNoteInTable(Row, string.Empty);
-
+            m_ListOfTypes[(int)eTypes.SystemRemark]++;
             m_CurrentLine++;// be ready to next insert
             return 0;
         }
@@ -572,13 +574,18 @@ namespace PapaProject
                 m_ProperitiesTable[Row, (int)eColumns.Type] = new StringBuilder(eTypes.LabelRemark.ToString());
                 m_ProperitiesTable[Row, (int)eColumns.Label] = new StringBuilder(LabelName);
                 m_ProperitiesTable[Row, (int)eColumns.Value] = new StringBuilder(LabelVal);
-              
+                m_ListOfTypes[(int)eTypes.Label]--;
+                m_ListOfTypes[(int)eTypes.LabelRemark]++;
+
+
             }
             else// IsChecked == false -> make it back to label
             {
                 m_ProperitiesTable[Row, (int)eColumns.Type] = new StringBuilder(eTypes.Label.ToString());
                 m_ProperitiesTable[Row, (int)eColumns.Label] = new StringBuilder(LabelName);
                 m_ProperitiesTable[Row, (int)eColumns.Value] = new StringBuilder(LabelVal);
+                m_ListOfTypes[(int)eTypes.Label]++;
+                m_ListOfTypes[(int)eTypes.LabelRemark]--;
 
             }
             return 0;
@@ -595,5 +602,13 @@ namespace PapaProject
             get { return this.m_NumberOfColunms; }
 
         }
-     }
+        public int NumberOfLabelRemark
+        {
+            get { return m_ListOfTypes[(int)eTypes.LabelRemark]; }
+        }
+        public int NumberOfLabel
+        {
+            get { return m_ListOfTypes[(int)eTypes.Label]; }
+        }
+    }
 }

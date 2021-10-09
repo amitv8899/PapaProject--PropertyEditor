@@ -11,5 +11,5 @@ adi=true
 #1
 #<@>*FieldType(string)
 #<@>*Caption(good!)
-omer=hello
+omer="Mefager"
 

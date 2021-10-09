@@ -42,38 +42,84 @@ namespace PapaProject
             this.FlowAllLine = new System.Windows.Forms.FlowLayoutPanel();
             this.ButtomUpdate = new System.Windows.Forms.Button();
             this.ButtomRemarkList = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // FlowAllLine
             // 
             resources.ApplyResources(this.FlowAllLine, "FlowAllLine");
+            this.FlowAllLine.BackColor = System.Drawing.SystemColors.ControlLight;
             this.FlowAllLine.Name = "FlowAllLine";
             // 
             // ButtomUpdate
             // 
             resources.ApplyResources(this.ButtomUpdate, "ButtomUpdate");
+            this.ButtomUpdate.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ButtomUpdate.FlatAppearance.BorderColor = System.Drawing.SystemColors.ControlLight;
             this.ButtomUpdate.Name = "ButtomUpdate";
-            this.ButtomUpdate.UseVisualStyleBackColor = true;
+            this.ButtomUpdate.UseVisualStyleBackColor = false;
             this.ButtomUpdate.Click += new System.EventHandler(this.ButtomUpdate_Clicked);
             // 
             // ButtomRemarkList
             // 
             resources.ApplyResources(this.ButtomRemarkList, "ButtomRemarkList");
-            this.ButtomRemarkList.BackColor = System.Drawing.SystemColors.Control;
+            this.ButtomRemarkList.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ButtomRemarkList.FlatAppearance.BorderColor = System.Drawing.SystemColors.ControlLight;
             this.ButtomRemarkList.Name = "ButtomRemarkList";
             this.ButtomRemarkList.UseVisualStyleBackColor = false;
             this.ButtomRemarkList.Click += new System.EventHandler(this.ButtomLabelRemark_Clicked);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            resources.ApplyResources(this.menuStrip1, "menuStrip1");
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(30, 30);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.helpToolStripMenuItem});
+            this.menuStrip1.Name = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            resources.ApplyResources(this.fileToolStripMenuItem, "fileToolStripMenuItem");
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            resources.ApplyResources(this.openToolStripMenuItem, "openToolStripMenuItem");
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            resources.ApplyResources(this.helpToolStripMenuItem, "helpToolStripMenuItem");
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog.FileName = "openFileDialog1";
             // 
             // PropertyFrom
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.Controls.Add(this.ButtomRemarkList);
             this.Controls.Add(this.ButtomUpdate);
             this.Controls.Add(this.FlowAllLine);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "PropertyFrom";
-            this.Load += new System.EventHandler(this.Form_Load);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -82,5 +128,10 @@ namespace PapaProject
         private FlowLayoutPanel FlowAllLine;
         private Button ButtomUpdate;
         private Button ButtomRemarkList;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem openToolStripMenuItem;
+        private ToolStripMenuItem helpToolStripMenuItem;
+        private OpenFileDialog openFileDialog;
     }
 }

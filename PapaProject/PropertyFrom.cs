@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+
 
 namespace PapaProject
 {
@@ -18,38 +20,58 @@ namespace PapaProject
         private Table m_PropertiesTable;
         private bool m_ChangeHadBeenMade = false;
         private bool m_NeedShowLabelRemark = false;
-        private int m_NumberLabel = 0;
-        private int m_NumberLabelRemark = 0;
         private Line m_CurLineSelected = null;// if null no line is selected
 
        // readonly MaterialSkin.MaterialSkinManager r_MaterialSkinManager;
 
-        public PropertyFrom()
+        public PropertyFrom(string FileNameAsArgs)
         {
+            
             InitializeComponent();
+            // allocate 
+            m_Newfile = new ReadFromFile();
+            m_PropertiesTable = new Table();
+            this.Load += new System.EventHandler(this.Form_Load);
+            m_Newfile.FilePath = FileNameAsArgs;
+
+
             //r_MaterialSkinManager = MaterialSkin.MaterialSkinManager.Instance;
             //r_MaterialSkinManager.EnforceBackcolorOnAllComponents = true;
             //r_MaterialSkinManager.AddFormToManage(this);
             //this.ControlBox = true;
 
-
         }
         private void Form_Load(object sender, EventArgs e)
         {
-            // allocate 
-            m_Newfile = new ReadFromFile();
-            m_PropertiesTable = new Table();
             // create table 
             CreateTableFromFile();
             //this
             this.FormClosing += new FormClosingEventHandler(FormClosed_Clicked);
+            this.openToolStripMenuItem.Click += new EventHandler(OpenToolStripMenuItem_Clicked);
+            // if (name of file is not empty or null )
             CreateLine();
         }
+        private void OpenToolStripMenuItem_Clicked(object sender, EventArgs e)
+        {
+           this.openFileDialog = new OpenFileDialog();
+           if( this.openFileDialog.ShowDialog() == DialogResult.OK)
+           {
+                m_Newfile.FilePath = this.openFileDialog.FileName;
+                if (m_LineArray.Count != 0)
+                {
+                    m_LineArray.Clear();
+                    FlowAllLine.Controls.Clear();
+                }
+                CreateTableFromFile();
+                CreateLine();
+            }
 
 
+
+        }
         private void CreateLine() 
         {
-            if (InitializeAllLine() == 0)
+            if (InitializeAllLine() == 0 && m_Newfile.FilePath != string.Empty)
             {
                 this.ClientSize = new Size(m_LineArray.Last<Line>().Size.Width + 20, 200);
                 this.MinimumSize = new Size(m_LineArray.Last<Line>().Size.Width + 40, FlowAllLine.Height);
@@ -57,7 +79,7 @@ namespace PapaProject
             }
             else
             {
-                if (m_PropertiesTable.IsTableEmpty())
+                if (m_PropertiesTable.IsTableEmpty() && m_Newfile.FilePath != string.Empty)
                 {
                     MessageBox.Show("No label or Remark Label");
                     this.Close();
@@ -69,27 +91,30 @@ namespace PapaProject
         {
             string LineFromFile;
             bool FileNotOver = true;
-            m_Newfile.TakeNameFileFromUser();
-            m_Newfile.CoutNumberProperties(out int NumberOfLines);
-            m_PropertiesTable.IntinitializeNewTableFromFile(NumberOfLines);
-            int Ok = 0;
-            while (FileNotOver)
+            if (m_Newfile.SetNameFileFromUser() == 0)
             {
-                LineFromFile = m_Newfile.ReadNextLineFromFile();
-                if (LineFromFile == null)// end of file! if line == null 
+                m_Newfile.CoutNumberProperties(out int NumberOfLines);
+                m_PropertiesTable.IntinitializeNewTableFromFile(NumberOfLines);
+                int Ok = 0;
+                while (FileNotOver)
                 {
-                    FileNotOver = false;
-                }
-                else
-                {
-                    Ok = m_PropertiesTable.InsertLineToTable(LineFromFile);
-                    if (Ok == 1) // 1 == not Ok!!
+                    LineFromFile = m_Newfile.ReadNextLineFromFile();
+                    if (LineFromFile == null)// end of file! if line == null 
                     {
-                        break;
+                        FileNotOver = false;
+                    }
+                    else
+                    {
+                        Ok = m_PropertiesTable.InsertLineToTable(LineFromFile);
+                        if (Ok == 1) // 1 == not Ok!!
+                        {
+                            break;
+                        }
                     }
                 }
+                m_Newfile.CloseFile(); // close file , table is ready
             }
-            m_Newfile.CloseFile(); // close file , table is ready
+           
         }
         public int InitializeAllLine() // initialize form from the table to user 
         {
@@ -98,9 +123,6 @@ namespace PapaProject
             bool MoreLineInTable = true;
             int IndexForLine = 1;
             int ToReturn = 0;
-            m_NumberLabel = 0; // make zero again
-            m_NumberLabelRemark = 0;// make zero again
-            //# check if table is empty!
             while (MoreLineInTable)
             {
                 NewLine = m_PropertiesTable.LineTable(IndexForLine);// if table is done or is empty so break
@@ -109,16 +131,6 @@ namespace PapaProject
                 {
                     MoreLineInTable = false;
                     break;
-                }
-              
-                if ((NewLine[0].ToString() == eTypes.Label.ToString()))
-                {
-                   m_NumberLabel++;
-                }
-                else if((NewLine[0].ToString() == eTypes.LabelRemark.ToString()))
-                {
-                   
-                    m_NumberLabelRemark++;
                 }
                 if ((NewLine[0].ToString() == eTypes.Label.ToString()) || (m_NeedShowLabelRemark && (NewLine[0].ToString() == eTypes.LabelRemark.ToString())))
                 {
@@ -148,7 +160,7 @@ namespace PapaProject
                 }
                 IndexForLine++;
             }
-            if (m_LineArray.Count == 0)
+            if (m_LineArray.Count == 0 && m_Newfile.FilePath != string.Empty)
             {
 
                 MessageBox.Show("No Label To Show!");
@@ -225,7 +237,7 @@ namespace PapaProject
         {
            if (m_NeedShowLabelRemark == false)
            {
-               if (m_NumberLabelRemark != 0)   // if there zero Remark label   
+               if (m_PropertiesTable.NumberOfLabelRemark != 0)   // if there zero Remark label   
                { 
                   ButtomRemarkList.Text = "Hide Remarks";
                   m_NeedShowLabelRemark = true;
@@ -237,12 +249,13 @@ namespace PapaProject
                }
                else
                {
+                    ButtomRemarkList.Text = "Show Remarks";
                     MessageBox.Show("No Remark Label To Show", "PropertyForm");
                }    
            }
            else
            {
-                if (m_NumberLabel != 0)// if there zero label and there is remark label 
+                if (m_PropertiesTable.NumberOfLabel != 0)// if there zero label and there is remark label 
                 {
                     ButtomRemarkList.Text = "Show Remarks";
                     m_NeedShowLabelRemark = false;
@@ -254,6 +267,7 @@ namespace PapaProject
                 }
                 else
                 {
+                    ButtomRemarkList.Text = "Hide Remarks";
                     MessageBox.Show("No Label To Show", "PropertyForm");
                 }
              
@@ -272,9 +286,9 @@ namespace PapaProject
             {
                 Msg.AppendFormat("The Label {0} became Remark, after update ie will appaer in Remark List", LabelName);
                 MessageBox.Show(Msg.ToString());
-                this.m_NumberLabelRemark++;
-                this.m_NumberLabel--;
-                if (m_NumberLabel == 0 )
+               // this.m_NumberLabelRemark++;
+                //this.m_NumberLabel--;
+                if (m_PropertiesTable.NumberOfLabel == 0 )
                 {
                    ButtomRemarkList.Text = "  Hide Remarks  ";
                 }
@@ -283,9 +297,9 @@ namespace PapaProject
             {
                 Msg.AppendFormat("The Label {0} became No Remark", LabelName);
                 MessageBox.Show(Msg.ToString());
-                this.m_NumberLabelRemark--;
-                this.m_NumberLabel++;
-                if (m_NumberLabelRemark == 0)
+                //this.m_NumberLabelRemark--;
+                //this.m_NumberLabel++;
+                if (m_PropertiesTable.NumberOfLabelRemark == 0)
                 {
                     ButtomRemarkList.Text = "Show Remarks";
                 }

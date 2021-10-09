@@ -10,12 +10,25 @@ namespace PapaProject
     {
         private PropertyFrom m_PropertyForm;
        
-        public void StartProgram() 
+        public void StartProgram(string[] args) 
         {
-            m_PropertyForm = new PropertyFrom();
-            m_PropertyForm.ShowDialog();
+            string argsStr = string.Empty;
+            if (args.Length < 2) 
+            {
+                if (args.Length == 1)
+                {
+                    argsStr = args[0];
+                }
+                // else send empty string
 
-           m_PropertyForm.printethetabletoconsole();
+                m_PropertyForm = new PropertyFrom(argsStr);
+                m_PropertyForm.ShowDialog();
+                m_PropertyForm.printethetabletoconsole();
+            }
+            else
+            {
+                Console.WriteLine("To much Args");
+            }
         }
       
 

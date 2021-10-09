@@ -9,11 +9,11 @@ namespace PapaProject
 {
     public  class Program
     {
-
-        public static void Main()
+        [STAThread]
+        public static void Main(string[] args)
         {
             EditorManger program = new EditorManger();
-            program.StartProgram();
+            program.StartProgram(args);
           
         }
 

@@ -65,6 +65,11 @@
       <DependentUpon>Line.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="PropertyFrom.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +92,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Line.resx">
       <DependentUpon>Line.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="PropertyFrom.resx">
       <DependentUpon>PropertyFrom.cs</DependentUpon>
