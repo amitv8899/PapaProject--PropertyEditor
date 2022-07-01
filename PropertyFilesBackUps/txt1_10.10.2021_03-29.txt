@@ -1,0 +1,8 @@
+omer=amit viner
+#<@>*FiledRange(1,19)
+#<@>*FieldType(int)
+#<@>*Caption(good!)
+amit=13
+#<@>*FieldType(bool)
+#<@>*Caption(good!)
+adi=True

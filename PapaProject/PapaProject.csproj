@@ -56,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="DefaultInput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DefaultInput.Designer.cs">
+      <DependentUpon>DefaultInput.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditorManger.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Line.cs">
@@ -90,6 +96,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DefaultInput.resx">
+      <DependentUpon>DefaultInput.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Line.resx">
       <DependentUpon>Line.cs</DependentUpon>
     </EmbeddedResource>

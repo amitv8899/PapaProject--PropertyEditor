@@ -28,7 +28,7 @@ namespace PapaProject
             InitializeComponent();
             //Label Name
             this.LabelName.Text = LabelName;
-
+            
             //Label Equal
             
 
@@ -42,6 +42,7 @@ namespace PapaProject
             CreateInputControl();
             this.m_Input.Text = Value;
             this.Controls.Add(this.m_Input);
+            this.flowLayoutPanel.Controls.Add(this.m_Input);
 
 
         }
@@ -50,7 +51,9 @@ namespace PapaProject
 
             if (m_Type == "bool")
             {
+                
                 ComboBox temp = new System.Windows.Forms.ComboBox();
+                temp.FlatStyle = FlatStyle.Popup;
                 temp.Items.Add("True");
                 temp.Items.Add("False");
                 m_Input = temp;
@@ -60,6 +63,8 @@ namespace PapaProject
             else if (m_Type == "int" && m_Range != string.Empty)
             {
                 NumericUpDown temp = new System.Windows.Forms.NumericUpDown();
+                temp.BorderStyle = BorderStyle.FixedSingle;
+                
                 GetMinAndMaxFormString(m_Range, out int Min, out int Max);
                 temp.Maximum = Max;
                 temp.Minimum = Min;
@@ -71,6 +76,8 @@ namespace PapaProject
                 RichTextBox temp = new System.Windows.Forms.RichTextBox();
                 temp.Multiline = true;
                 m_Input = temp;
+                //DefaultInput temp = new DefaultInput();
+                //m_Input = temp;
             }
         }
         private int GetMinAndMaxFormString(string Range, out int Min, out int Max)

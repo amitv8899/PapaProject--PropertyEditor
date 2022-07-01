@@ -36,13 +36,15 @@ namespace PapaProject
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addBeforeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addAfterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.materialContextMenuLine.SuspendLayout();
+            this.flowLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // LabelName
             // 
             this.LabelName.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.LabelName.Location = new System.Drawing.Point(45, 7);
+            this.LabelName.Location = new System.Drawing.Point(3, 0);
             this.LabelName.Name = "LabelName";
             this.LabelName.Size = new System.Drawing.Size(93, 29);
             this.LabelName.TabIndex = 0;
@@ -51,7 +53,7 @@ namespace PapaProject
             // LabelEqual
             // 
             this.LabelEqual.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.LabelEqual.Location = new System.Drawing.Point(144, 7);
+            this.LabelEqual.Location = new System.Drawing.Point(102, 0);
             this.LabelEqual.Name = "LabelEqual";
             this.LabelEqual.Size = new System.Drawing.Size(27, 29);
             this.LabelEqual.TabIndex = 1;
@@ -96,18 +98,27 @@ namespace PapaProject
             this.addAfterToolStripMenuItem.Size = new System.Drawing.Size(204, 34);
             this.addAfterToolStripMenuItem.Text = "Add after";
             // 
+            // flowLayoutPanel
+            // 
+            this.flowLayoutPanel.Controls.Add(this.LabelName);
+            this.flowLayoutPanel.Controls.Add(this.LabelEqual);
+            this.flowLayoutPanel.Location = new System.Drawing.Point(4, 3);
+            this.flowLayoutPanel.Name = "flowLayoutPanel";
+            this.flowLayoutPanel.Size = new System.Drawing.Size(419, 49);
+            this.flowLayoutPanel.TabIndex = 2;
+            // 
             // Line
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ContextMenuStrip = this.materialContextMenuLine;
-            this.Controls.Add(this.LabelEqual);
-            this.Controls.Add(this.LabelName);
+            this.Controls.Add(this.flowLayoutPanel);
             this.Name = "Line";
-            this.Size = new System.Drawing.Size(590, 62);
+            this.Size = new System.Drawing.Size(426, 55);
             this.Load += new System.EventHandler(this.Line_Load);
             this.materialContextMenuLine.ResumeLayout(false);
+            this.flowLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -123,5 +134,6 @@ namespace PapaProject
         private System.Windows.Forms.ToolStripMenuItem addBeforeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addAfterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem remarkToolStroMenuItem;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel;
     }
 }

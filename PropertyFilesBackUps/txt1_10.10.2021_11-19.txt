@@ -1,0 +1,15 @@
+#<@>*FiledRange(1,19)
+#<@>*FieldType(int)
+#<@>*Caption(good!)
+amit=18
+#<@>*FieldType(bool)
+#<@>*Caption(good!)
+adi=true
+#<@>*Caption(good!)
+#asad=14\
+#12\
+#1
+#<@>*FieldType(string)
+#<@>*Caption(good!)
+omer=hello
+

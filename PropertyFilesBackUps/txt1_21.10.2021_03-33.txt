@@ -1,0 +1,15 @@
+#<@>*FiledRange(1,19)
+#<@>*FieldType(int)
+#<@>*Caption(good!)
+amit=19
+#<@>*FieldType(bool)
+#<@>*Caption(good!)
+adi=False
+#<@>*Caption(good!)
+famliy=54\
+25,21\
+17
+#<@>*FieldType(string)
+#<@>*Caption(good!)
+omer="Mefager"
+
